@@ -18,6 +18,10 @@
           <button class="btn btn-primary" type="button" @click="queryIPFS(nftID)">View on IPFS</button>
         </div>
 
+        <div style="margin-top: 1em; margin-bottom: 1em">
+          <button class="btn btn-primary" type="button" @click="queryRevokedCert(nftID)">View revoked certificates</button>
+        </div>
+
 
         <h6>Your current address:<br>
           <a :href="`https://testnet.bscscan.com/address/${currentAddr}`" target="_blank">{{currentAddr}}</a>
@@ -126,6 +130,20 @@ export default {
       .catch(err => {
         console.log(err)
         this.$data.data = "query failed"
+      })
+    },
+
+    queryRevokedCert(nftID) {
+      web3Service.queryRevokedStatus(nftID)
+      .then(response => {
+        if (response.isRevoked == false) {
+          this.$data.data = "HAS_NOT_BEEN_REVOKED"
+        } else {
+          this.$data.data = response
+        }
+      })
+      .catch(err => {
+        this.$data.data = err.message
       })
     }
   }

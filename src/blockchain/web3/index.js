@@ -91,8 +91,44 @@ class Web3Service {
     return txHash
   }
 
+  async revokeCertThroughMetamask(issuer, nftID, reason) {
+    console.log(issuer, nftID, reason)
+    // console.log(nftID)
+    // console.log([...nftID])
+    const data = this.contract.methods.revokeCertificate([nftID], reason).encodeABI()
+    const txConfig = {
+      from: issuer,
+      to: CONTRACTADDR,
+      value: 0,
+      data
+    }
+    const gasLimit = await this.web3.eth.estimateGas(txConfig).catch(err => console.log(err))
+    let nonce = await this.web3.eth.getTransactionCount(issuer).catch(err => console.log(err))
+    const tx = {
+      ...txConfig,
+      nonce: nonce.toString(),
+      gas: gasLimit.toString()
+    }
+    console.log(tx)
+    const { ethereum } = window
+    const txHash = await ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    })
+    return txHash
+  }
+
   decrypt(jsonData) {
     return decrypted(jsonData, AES192KEY)
+  }
+
+  async queryRevokedStatus(nftID) {
+    const status = await queryRevokedStatus(this.contract, nftID)
+    console.log(status)
+    return {
+      isRevoked: status[0],
+      reason: status[1]
+    }
   }
 }
 
@@ -182,6 +218,10 @@ function filterName(jsonCerts) {
     ret.push(fileName.split(".")[0])
     return ret
   }, [])
+}
+
+function queryRevokedStatus(contract, nftID) {
+  return contract.methods.revokedStatus(nftID).call()
 }
 
 function getNFTData(contract, nftID) {
