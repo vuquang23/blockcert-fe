@@ -1,7 +1,7 @@
 import Blockcert from './abi/Blockcert.json'
 import ERC20 from './abi/ERC20.json'
 import Web3 from 'web3'
-import {CONTRACTADDR, FEEADDR, AES192KEY} from '../../env'
+import {CONTRACTADDR, FEEADDR, AES192KEY, SPADDR} from '../../env'
 import BN from "bn.js";
 import { pushEncryptedCert } from '../ipfs'
 import {certData} from "../../data";
@@ -64,6 +64,32 @@ class Web3Service {
       issuanceTimestamp: arrayData[4]
     }
   }
+
+  // viewer pay
+  async approveThroughMetamask(viewer) {
+    const amount = await getFee(this.contract)
+    const data = this.feeToken.methods.approve(SPADDR, amount).encodeABI()
+    const txConfig = {
+      from: viewer,
+      to: FEEADDR,
+      value: 0,
+      data
+    }
+    const gasLimit = await this.web3.eth.estimateGas(txConfig).catch(err => console.log(err))
+    let nonce = await this.web3.eth.getTransactionCount(viewer).catch(err => console.log(err))
+    const tx = {
+      ...txConfig,
+      nonce,
+      gas: gasLimit
+    }
+    console.log(tx)
+    // const { ethereum } = window
+    // const txHash = await ethereum.request({
+    //   method: 'eth_sendTransaction',
+    //   params: [tx],
+    // })
+    // return txHash
+  } 
 }
 
 function sha256Hash(cert) {

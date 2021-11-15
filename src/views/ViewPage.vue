@@ -25,7 +25,7 @@
         <h6>Approve to pay fee and view decrypted certificate</h6>
 
         <div>
-          <button class="btn btn-primary" type="button">approve and view</button>
+          <button class="btn btn-primary" type="button" @click="payToView(nftID)">approve and view</button>
         </div>
 
         <div class="" style="margin-top: 1em; display: block;">
@@ -65,17 +65,23 @@ export default {
   },
   methods: {
     queryBlockchain(nftID) {
+      if (nftID === null) {
+        return
+      }
       web3Service.queryNFT(nftID)
       .then(response => {
         this.$data.data = response
       })
       .catch(err => {
         console.log(err)
-        this.$data.data = "query failed"
+        this.$data.data = err.message
       })
     },
 
     queryIPFS(nftID) {
+      if (nftID === null) {
+        return
+      }
       web3Service.queryNFT(nftID)
       .then(({ CID }) => {
         return getFile(CID)
@@ -85,10 +91,39 @@ export default {
       })
       .catch(err => {
         console.log(err)
-        this.$data.data = "query failed"
+        this.$data.data = err.message
       })
-    }
+    },
 
+    payToView(nftID) {
+      if (nftID === null) {
+        return
+      }
+      let promises = []
+      let p1 = web3Service.queryNFT(nftID)
+      .then(({ CID }) => {
+        return getFile(CID)
+      })
+      .then(response => {
+        this.$data.data = JSON.parse(response)
+      })
+      .catch(err => {
+        console.log(err)
+        this.$data.data = err.message
+      })
+
+      promises.push(p1)
+
+      // // fake action
+      let p2 = web3Service.approveThroughMetamask(this.$store.state.currentAddr)
+      promises.push(p2)
+      
+      Promise.all(promises)
+      .then(arrayData => {
+        console.log(arrayData[1])
+      })
+
+    }
   }
 }
 </script>
