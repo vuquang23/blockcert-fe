@@ -29,7 +29,8 @@
         <h6 class="fw-bold" style="margin-top: 0.5em">{{approveStatus}}</h6>
 
         <h6 class="fw-bold" style="margin-top: 3em">Sign certs</h6>
-        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button> <!-- :disabled="!isApproved" -->
+        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button>
+<!--        :disabled="!isApproved"-->
         <h6 class="fw-bold" style="margin-top: 0.5em">{{signStatus}}</h6>
       </div>
     </div>

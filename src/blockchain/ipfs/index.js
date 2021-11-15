@@ -1,6 +1,8 @@
 import {certData} from "../../data";
 import { create } from 'ipfs-http-client'
 import CryptoJS from 'crypto-js'
+// import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
+import toBuffer from 'it-to-buffer'
 
 function encrypted(jsonData, key) {
     const toString = JSON.stringify(jsonData)
@@ -38,6 +40,14 @@ async function pushEncryptedCert(certName, key) {
     return Promise.all(promises)
 }
 
+async function getFile(CID) {
+    const ipfsClient = create('http://localhost:5001')
+    const decoder = new TextDecoder()
+    const data = await toBuffer(ipfsClient.cat(CID))
+    return decoder.decode(data)
+}
+
 export {
-    pushEncryptedCert
+    pushEncryptedCert,
+    getFile
 }

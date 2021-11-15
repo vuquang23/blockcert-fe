@@ -1,7 +1,8 @@
-// for (let i = 0; i < 20; i++) {
+// for (let i = 0; i < 30; i++) {
 //     console.log(`import cert${i} from './cert${i}.json'`)
 // }
-// for (let i = 0; i < 20; i++) {
+//
+// for (let i = 0; i < 30; i++) {
 //     console.log(`cert${i},`)
 // }
 
@@ -25,6 +26,16 @@ import cert16 from './cert16.json'
 import cert17 from './cert17.json'
 import cert18 from './cert18.json'
 import cert19 from './cert19.json'
+import cert20 from './cert20.json'
+import cert21 from './cert21.json'
+import cert22 from './cert22.json'
+import cert23 from './cert23.json'
+import cert24 from './cert24.json'
+import cert25 from './cert25.json'
+import cert26 from './cert26.json'
+import cert27 from './cert27.json'
+import cert28 from './cert28.json'
+import cert29 from './cert29.json'
 
 export const certData = {
     cert0,
@@ -46,5 +57,15 @@ export const certData = {
     cert16,
     cert17,
     cert18,
-    cert19
+    cert19,
+    cert20,
+    cert21,
+    cert22,
+    cert23,
+    cert24,
+    cert25,
+    cert26,
+    cert27,
+    cert28,
+    cert29
 }

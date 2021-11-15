@@ -6173,6 +6173,13 @@
   "resolved" "https://registry.npmjs.org/it-peekable/-/it-peekable-1.0.3.tgz"
   "version" "1.0.3"
 
+"it-to-buffer@^2.0.2":
+  "integrity" "sha512-Frbv1sphcNFvD807Qw5fXpK4L7iuqShYSI7k30PfpJiy5IxdqMyaulWpLyl1hIJVVpkG+1UrJafFCnatzmZf5g=="
+  "resolved" "https://registry.npmjs.org/it-to-buffer/-/it-to-buffer-2.0.2.tgz"
+  "version" "2.0.2"
+  dependencies:
+    "uint8arrays" "^3.0.0"
+
 "it-to-stream@^1.0.0":
   "integrity" "sha512-pLULMZMAB/+vbdvbZtebC0nWBTbG581lk6w8P7DfIIIKUfa8FbY7Oi0FxZcFPbxvISs7A9E+cMpLDBc1XhpAOA=="
   "resolved" "https://registry.npmjs.org/it-to-stream/-/it-to-stream-1.0.0.tgz"
@@ -9964,6 +9971,11 @@
   "resolved" "https://registry.npm.taobao.org/vue-hot-reload-api/download/vue-hot-reload-api-2.3.4.tgz"
   "version" "2.3.4"
 
+"vue-json-pretty@^2.0.6":
+  "integrity" "sha512-aVdxw8ZRGR/Uj8GEaJ1/W2Ks/MdCfv5t2HRbbd+ICp3nL7msKRLN+1qOkSzaMvDygbDPxGhwUHBxZz8nxP+r3A=="
+  "resolved" "https://registry.npmjs.org/vue-json-pretty/-/vue-json-pretty-2.0.6.tgz"
+  "version" "2.0.6"
+
 "vue-loader-v16@npm:vue-loader@^16.1.0":
   "integrity" "sha1-1D5nXe9bqTRdbH8FkUwT2GGZcIc="
   "resolved" "https://registry.npmmirror.com/vue-loader/download/vue-loader-16.8.3.tgz?cache=0&sync_timestamp=1636034570924&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fvue-loader%2Fdownload%2Fvue-loader-16.8.3.tgz"
@@ -10004,7 +10016,7 @@
   "resolved" "https://registry.npm.taobao.org/vue-template-es2015-compiler/download/vue-template-es2015-compiler-1.9.1.tgz"
   "version" "1.9.1"
 
-"vue@^2 || ^3.0.0-0", "vue@^3.0.0", "vue@^3.0.2", "vue@3.2.21":
+"vue@^2 || ^3.0.0-0", "vue@^3.0.0", "vue@^3.0.2", "vue@>=3.0.0", "vue@3.2.21":
   "integrity" "sha1-VfVmUXLZXPl+gGuarQo3UYC+I6E="
   "resolved" "https://registry.npmmirror.com/vue/download/vue-3.2.21.tgz"
   "version" "3.2.21"

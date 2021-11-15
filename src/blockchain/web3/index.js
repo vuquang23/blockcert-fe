@@ -53,6 +53,17 @@ class Web3Service {
     console.log(receipt)
     return true
   }
+
+  async queryNFT(nftID) {
+    const arrayData = await getNFTData(this.contract, nftID)
+    return {
+      issuer: arrayData[0],
+      recipient: arrayData[1],
+      certHash: arrayData[2],
+      CID: arrayData[3],
+      issuanceTimestamp: arrayData[4]
+    }
+  }
 }
 
 function sha256Hash(cert) {
@@ -141,6 +152,10 @@ function filterName(jsonCerts) {
     ret.push(fileName.split(".")[0])
     return ret
   }, [])
+}
+
+function getNFTData(contract, nftID) {
+  return contract.methods.certData(nftID).call()
 }
 
 function getFee(contract) {
