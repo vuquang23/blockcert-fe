@@ -151,7 +151,9 @@ export default {
 </script>
 
 <style scoped>
+/*
 div, div > * {
   border: 1px solid black;
 }
+*/
 </style>

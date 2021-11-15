@@ -49,9 +49,17 @@ class Web3Service {
     // console.log(data)
     const mergedData = merge(data, cidData) // [{ issuer: ...}, ...]
     // console.log(mergedData)
-    const receipt = await pushCert(this.contract, this.web3, issuer, mergedData, this.privateKey).catch(err => console.log(err))
-    console.log(receipt)
-    return true
+    const receipt = await pushCert(this.contract, this.web3, issuer, mergedData, this.privateKey)
+    .catch(err => {
+      console.log(err)
+      throw new Error("something wrong. cert_hash maybe existed")
+    })
+    
+    return receipt.reduce((ret, data) => {
+      console.log(data, data.transactionHash)
+      ret.push(data.transactionHash)
+      return ret
+    }, [])
   }
 
   async queryNFT(nftID) {

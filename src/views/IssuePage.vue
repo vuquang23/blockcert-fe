@@ -29,9 +29,16 @@
         <h6 class="fw-bold" style="margin-top: 0.5em">{{approveStatus}}</h6>
 
         <h6 class="fw-bold" style="margin-top: 3em">Sign certs</h6>
-        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button>
-<!--        :disabled="!isApproved"-->
+        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" :disabled="!isApproved">Sign</button>
+        
         <h6 class="fw-bold" style="margin-top: 0.5em">{{signStatus}}</h6>
+
+        <h6 v-show="typeof txsHash === 'object' ? (txsHash.length > 0) : false">Tx Hash:</h6>
+       
+        <h6 v-for="(item, index) in txsHash" :key="index">
+           <a :href="`https://testnet.bscscan.com/tx/${item}`" target="_blank">{{item}}</a>
+        </h6> 
+        
       </div>
     </div>
   </div>
@@ -54,7 +61,8 @@ export default {
       isApproved: false,
       privateKey: null,
       approveStatus: null,
-      signStatus: null
+      signStatus: null,
+      txsHash: []
     }
   },
   methods: {
@@ -62,8 +70,8 @@ export default {
       this.$data.jsonCerts = [...event.target.files]
       this.$data.isApproved = false
       this.$data.approveStatus = null
-      this.$data.signStatus = null
-      // console.log(this.$data.jsonCerts)
+      this.$data.signStatus = null,
+      this.$data.txsHash = []
     },
 
     importPrivateKey() {
@@ -91,13 +99,14 @@ export default {
 
     signCerts() {
       web3Service.signCerts(this.$data.currentAddr, this.$data.jsonCerts)
-      .then((response) => {
-        console.log(response)
+      .then((txsHash) => {
         this.$data.signStatus = "sign OK!"
+        this.$data.txsHash = txsHash
+        console.log(txsHash)
       })
       .catch(err => {
         console.log(err)
-        this.$data.signStatus = "sign ERROR!";
+        this.$data.signStatus = err.message
       })
     }
   }
@@ -105,8 +114,10 @@ export default {
 </script>
 
 <style scoped>
+/*
 div, div > * {
   border: 1px solid black;
 }
+*/
 
 </style>

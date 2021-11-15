@@ -22,7 +22,7 @@
 
 
 
-// 'd64eb0dd27dd03f72094ca330eb2a46d2909d9fc08d72f96ea260682a0b8c5a1'
+// 
 const key = Buffer.from('1c4682bcd4430f2a6d4d84b7654be7d0cca5b6d7421f3c133', 'hex')
 // console.log(Buffer.from(x, 'hex'))
 
@@ -35,3 +35,6 @@ var originalText = bytes.toString(CryptoJS.enc.Utf8);
 console.log(originalText)
 var decrypted = CryptoJS.AES.decrypt(encrypted, key);
 console.log(decrypted)
+
+
+// KEY: 'd64eb0dd27dd03f72094ca330eb2a46d2909d9fc08d72f96ea260682a0b8c5a1'
