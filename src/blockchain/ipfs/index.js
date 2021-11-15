@@ -12,6 +12,17 @@ function encrypted(jsonData, key) {
     return ciphertext
 }
 
+function decrypted(jsonData, key) {
+    const ciphertext = jsonData.achievement
+    let bytes = CryptoJS.AES.decrypt(ciphertext, key)
+    var originalText = bytes.toString(CryptoJS.enc.Utf8)
+    const ret = {
+        ...jsonData,
+        achievement: JSON.parse(originalText)
+    }
+    console.log(ret)
+    return ret
+}
 
 async function pushEncryptedCert(certName, key) {
     const ipfsClient = create('http://localhost:5001')
@@ -49,5 +60,6 @@ async function getFile(CID) {
 
 export {
     pushEncryptedCert,
-    getFile
+    getFile,
+    decrypted
 }

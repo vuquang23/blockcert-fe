@@ -3,7 +3,7 @@ import ERC20 from './abi/ERC20.json'
 import Web3 from 'web3'
 import {CONTRACTADDR, FEEADDR, AES192KEY, SPADDR} from '../../env'
 import BN from "bn.js";
-import { pushEncryptedCert } from '../ipfs'
+import { pushEncryptedCert, decrypted } from '../ipfs'
 import {certData} from "../../data";
 const {createHash} = require('crypto')
 
@@ -79,17 +79,21 @@ class Web3Service {
     let nonce = await this.web3.eth.getTransactionCount(viewer).catch(err => console.log(err))
     const tx = {
       ...txConfig,
-      nonce,
-      gas: gasLimit
+      nonce: nonce.toString(),
+      gas: gasLimit.toString()
     }
     console.log(tx)
-    // const { ethereum } = window
-    // const txHash = await ethereum.request({
-    //   method: 'eth_sendTransaction',
-    //   params: [tx],
-    // })
-    // return txHash
-  } 
+    const { ethereum } = window
+    const txHash = await ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    })
+    return txHash
+  }
+
+  decrypt(jsonData) {
+    return decrypted(jsonData, AES192KEY)
+  }
 }
 
 function sha256Hash(cert) {

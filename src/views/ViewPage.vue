@@ -100,29 +100,33 @@ export default {
         return
       }
       let promises = []
+
       let p1 = web3Service.queryNFT(nftID)
       .then(({ CID }) => {
         return getFile(CID)
       })
       .then(response => {
-        this.$data.data = JSON.parse(response)
+        return JSON.parse(response)
       })
       .catch(err => {
         console.log(err)
         this.$data.data = err.message
       })
-
       promises.push(p1)
 
-      // // fake action
+      // fake action
       let p2 = web3Service.approveThroughMetamask(this.$store.state.currentAddr)
       promises.push(p2)
-      
+
       Promise.all(promises)
       .then(arrayData => {
-        console.log(arrayData[1])
+        const encryptedData = arrayData[0]
+        this.$data.data = web3Service.decrypt(encryptedData)
       })
-
+      .catch(err => {
+        console.log(err)
+        this.$data.data = "query failed"
+      })
     }
   }
 }
@@ -132,5 +136,4 @@ export default {
 div, div > * {
   border: 1px solid black;
 }
-
 </style>
