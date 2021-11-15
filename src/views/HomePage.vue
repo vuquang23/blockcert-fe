@@ -15,6 +15,9 @@
           </li>
         </ul>
       </div>
+      <div class="d-flex">
+        <button class="btn btn-outline-success" @click="connectWallet()">Connect to metamask</button>
+      </div>
     </div>
   </nav>
   <hr>
@@ -25,7 +28,23 @@
 
 <script>
 export default {
-  name: "HomePage"
+  name: "HomePage",
+  mounted() {
+    const { ethereum } = window
+    ethereum.on('accountsChanged', (accounts) => {
+      this.$store.commit("changeAddr", accounts[0])
+    })
+  },
+  methods: {
+    connectWallet() {
+      const { ethereum } = window
+      ethereum.request({ method: 'eth_requestAccounts' })
+      .then(accounts => {
+        this.$store.commit("changeAddr", accounts[0])
+      })
+      .catch(err => console.log(err))
+    }
+  }
 }
 </script>
 

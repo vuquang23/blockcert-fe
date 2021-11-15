@@ -58,6 +58,11 @@ export default {
       data: ""
     }
   },
+  computed: {
+    currentAddr() {
+      return this.$store.state.currentAddr
+    }
+  },
   methods: {
     queryBlockchain(nftID) {
       web3Service.queryNFT(nftID)
