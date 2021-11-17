@@ -2,11 +2,6 @@
 <div class="container vh-100">
   <div class="row justify-content-center vh-100">
     <div class="col-6">
-      <div class="input-group mb-3">
-        <input v-model="privateKey" type="text" class="form-control" placeholder="private key" aria-label="private key" aria-describedby="button-addon2">
-        <button class="btn btn-outline-secondary" type="button" id="button-addon2" @click="importPrivateKey">Import</button>
-      </div>
-
       <h6>(please use <span class="fw-bold">{{issuerAddr}}</span> for testing)</h6>
       <h6>Your current address:<br>
         <a :href="`https://testnet.bscscan.com/address/${currentAddr}`" target="_blank">{{currentAddr}}</a>
@@ -29,8 +24,8 @@
         <h6 class="fw-bold" style="margin-top: 0.5em">{{approveStatus}}</h6>
 
         <h6 class="fw-bold" style="margin-top: 3em">Sign certs</h6>
-        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" :disabled="!isApproved">Sign</button>
-        
+        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button>
+<!--        :disabled="!isApproved"-->
         <h6 class="fw-bold" style="margin-top: 0.5em">{{signStatus}}</h6>
 
         <h6 v-show="typeof txsHash === 'object' ? (txsHash.length > 0) : false">Tx Hash:</h6>
@@ -55,7 +50,6 @@ export default {
     return {
       issuerAddr: ISSUERADDR,
       contractAddr: CONTRACTADDR,
-      currentAddr: null,
       spAddr: SPADDR,
       jsonCerts: [],
       isApproved: false,
@@ -63,6 +57,11 @@ export default {
       approveStatus: null,
       signStatus: null,
       txsHash: []
+    }
+  },
+  computed: {
+    currentAddr() {
+      return this.$store.state.currentAddr
     }
   },
   methods: {
@@ -85,7 +84,7 @@ export default {
         console.log('no certs selected')
         return
       }
-      web3Service.approve(this.$data.issuerAddr, this.$data.jsonCerts.length)
+      web3Service.approve(this.currentAddr, this.$data.jsonCerts.length)
       .then(response => {
         console.log(response)
         this.$data.isApproved = response
@@ -98,7 +97,7 @@ export default {
     },
 
     signCerts() {
-      web3Service.signCerts(this.$data.currentAddr, this.$data.jsonCerts)
+      web3Service.signCerts(this.currentAddr, this.$data.jsonCerts)
       .then((txsHash) => {
         this.$data.signStatus = "sign OK!"
         this.$data.txsHash = txsHash

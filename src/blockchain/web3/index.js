@@ -12,7 +12,6 @@ class Web3Service {
     this.web3 = new Web3('https://data-seed-prebsc-1-s1.binance.org:8545/')
     this.contract = new this.web3.eth.Contract(Blockcert, CONTRACTADDR)
     this.feeToken = new this.web3.eth.Contract(ERC20, FEEADDR)
-    this.privateKey = null
   }
 
   async approve(issuer, certLen) {
@@ -22,22 +21,16 @@ class Web3Service {
       throw new Error('batchSize <= 0')
     }
 
-    const totalFee = (Math.floor((batchSize - 1)/certLen) + 1) * batchMintFee
+    const totalFee = (Math.floor((certLen - 1)/batchSize) + 1) * batchMintFee
     console.log(totalFee)
 
-    await approveFee(this.web3, this.feeToken, issuer, CONTRACTADDR, new BN(totalFee), this.privateKey)
+    await approveFee(this.web3, this.feeToken, issuer, CONTRACTADDR, new BN(totalFee))
       .catch(err => {
         console.log(err)
         throw new Error('approve failed')
       })
 
     return true
-  }
-
-  importPrivateKey(privateKey) {
-    this.privateKey = privateKey
-    const data = privateKeyToAccount(this.web3, `0x${privateKey}`)
-    return data
   }
 
   async signCerts(issuer, jsonCerts) {
@@ -49,15 +42,15 @@ class Web3Service {
     // console.log(data)
     const mergedData = merge(data, cidData) // [{ issuer: ...}, ...]
     // console.log(mergedData)
-    const receipt = await pushCert(this.contract, this.web3, issuer, mergedData, this.privateKey)
+    const receipt = await pushCert(this.contract, this.web3, issuer, mergedData)
     .catch(err => {
       console.log(err)
       throw new Error("something wrong. cert_hash maybe existed")
     })
     
     return receipt.reduce((ret, data) => {
-      console.log(data, data.transactionHash)
-      ret.push(data.transactionHash)
+      console.log(data)
+      ret.push(data)
       return ret
     }, [])
   }
@@ -190,10 +183,10 @@ function divideBatch(data, batchSize) {
   return certBatch
 }
 
-async function pushCert(contract, web3, issuer, data, privateKey) {
+async function pushCert(contract, web3, issuer, data) {
   const batchSize = await contract.methods.batchSize().call()
   const certBatch = divideBatch(data, batchSize)
-
+  const { ethereum } = window
   let txs = []
   let nonce = await web3.eth.getTransactionCount(issuer) - 1
   for (const batchID in certBatch) {
@@ -206,18 +199,31 @@ async function pushCert(contract, web3, issuer, data, privateKey) {
       data
     }
     const gasLimit = await web3.eth.estimateGas(txConfig).catch(err => console.log(err))
-    nonce ++
+    nonce++
     const tx = {
       ...txConfig,
-      nonce,
-      gas: gasLimit
+      nonce: nonce.toString(),
+      gas: gasLimit.toString()
     }
     // console.log(privateKey)
-    const signed = await web3.eth.accounts.signTransaction(tx, privateKey).catch(err => console.log(err))
-    txs.push(web3.eth.sendSignedTransaction(signed.rawTransaction))
+    let ok = false
+    while (ok === false) {
+      ok = true
+      const txHash = await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
+      .catch(err => {
+        ok = false
+        console.log(err)
+      })
+      if (ok === true) {
+        txs.push(txHash)
+      }
+    }
   }
-
-  return Promise.all(txs)
+  return txs
+  // return Promise.all(txs)
 }
 
 function filterName(jsonCerts) {
@@ -244,11 +250,7 @@ function getBatchSize(contract) {
   return contract.methods.batchSize().call()
 }
 
-function privateKeyToAccount(web3, privateKey) {
-  return web3.eth.accounts.privateKeyToAccount(privateKey).address
-}
-
-async function approveFee(web3, feeToken, owner, spender, amount, privateKey) {
+async function approveFee(web3, feeToken, owner, spender, amount) {
   const data = feeToken.methods.approve(spender, amount).encodeABI()
   const txConfig = {
     from: owner,
@@ -260,11 +262,18 @@ async function approveFee(web3, feeToken, owner, spender, amount, privateKey) {
   let nonce = await web3.eth.getTransactionCount(owner).catch(err => console.log(err))
   const tx = {
     ...txConfig,
-    nonce,
-    gas: gasLimit
+    nonce: nonce.toString(),
+    gas: gasLimit.toString()
   }
-  const signed = await web3.eth.accounts.signTransaction(tx, privateKey).catch(err => console.log(err))
-  return web3.eth.sendSignedTransaction(signed.rawTransaction)
+
+  const { ethereum } = window
+  return ethereum.request({
+    method: 'eth_sendTransaction',
+    params: [tx],
+  })
+  // return txHash
+  // const signed = await web3.eth.accounts.signTransaction(tx, privateKey).catch(err => console.log(err))
+  // return web3.eth.sendSignedTransaction(signed.rawTransaction)
 }
 
 
