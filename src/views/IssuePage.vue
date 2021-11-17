@@ -24,8 +24,8 @@
         <h6 class="fw-bold" style="margin-top: 0.5em">{{approveStatus}}</h6>
 
         <h6 class="fw-bold" style="margin-top: 3em">Sign certs</h6>
-        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button>
-<!--        :disabled="!isApproved"-->
+        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" :disabled="!isApproved">Sign</button>
+
         <h6 class="fw-bold" style="margin-top: 0.5em">{{signStatus}}</h6>
 
         <h6 v-show="typeof txsHash === 'object' ? (txsHash.length > 0) : false">Tx Hash:</h6>
