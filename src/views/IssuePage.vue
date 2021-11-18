@@ -24,8 +24,8 @@
         <h6 class="fw-bold" style="margin-top: 0.5em">{{approveStatus}}</h6>
 
         <h6 class="fw-bold" style="margin-top: 3em">Sign certs</h6>
-        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" :disabled="!isApproved">Sign</button>
-
+        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button>
+<!--        :disabled="!isApproved"-->
         <h6 class="fw-bold" style="margin-top: 0.5em">{{signStatus}}</h6>
 
         <h6 v-show="typeof txsHash === 'object' ? (txsHash.length > 0) : false">Tx Hash:</h6>
@@ -42,7 +42,7 @@
 
 <script>
 import {CONTRACTADDR, ISSUERADDR, SPADDR} from "@/env";
-import {web3Service} from "../blockchain/web3";
+import { approveIssueFee, issueCerts } from "../blockchain/web3";
 
 export default {
   name: "IssuePage",
@@ -51,7 +51,7 @@ export default {
       issuerAddr: ISSUERADDR,
       contractAddr: CONTRACTADDR,
       spAddr: SPADDR,
-      jsonCerts: [],
+      certFiles: [],
       isApproved: false,
       privateKey: null,
       approveStatus: null,
@@ -66,25 +66,20 @@ export default {
   },
   methods: {
     handleFileUpload(event) {
-      this.$data.jsonCerts = [...event.target.files]
+      this.$data.certFiles = [...event.target.files]
       this.$data.isApproved = false
       this.$data.approveStatus = null
-      this.$data.signStatus = null,
+      this.$data.signStatus = null
       this.$data.txsHash = []
-    },
-
-    importPrivateKey() {
-      this.$data.currentAddr = web3Service.importPrivateKey(this.$data.privateKey)
-      this.$data.privateKey = null
     },
 
     //TODO: show fee amount on UI
     makeApprove() {
-      if (this.$data.jsonCerts.length === 0) {
+      if (this.$data.certFiles.length === 0) {
         console.log('no certs selected')
         return
       }
-      web3Service.approve(this.currentAddr, this.$data.jsonCerts.length)
+      approveIssueFee(this.currentAddr, this.$data.contractAddr, this.$data.certFiles.length)
       .then(response => {
         console.log(response)
         this.$data.isApproved = response
@@ -97,11 +92,10 @@ export default {
     },
 
     signCerts() {
-      web3Service.signCerts(this.currentAddr, this.$data.jsonCerts)
+      issueCerts(this.currentAddr, this.$data.contractAddr, this.$data.certFiles)
       .then((txsHash) => {
         this.$data.signStatus = "sign OK!"
         this.$data.txsHash = txsHash
-        console.log(txsHash)
       })
       .catch(err => {
         console.log(err)
