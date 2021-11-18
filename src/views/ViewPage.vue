@@ -44,11 +44,11 @@
 
 <script>
 
-import {CONTRACTADDR} from "../env";
+import {AES192KEY, CONTRACTADDR} from "../env";
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
-import {web3Service} from "../blockchain/web3"
-import {getFile} from "../blockchain/ipfs"
+import {approveIssueFee, queryCertData, queryRevokedStatus} from "../blockchain/web3"
+import {getFile, decrypt} from "../blockchain/ipfs"
 
 export default {
   name: "ViewPage",
@@ -72,7 +72,7 @@ export default {
       if (nftID === null) {
         return
       }
-      web3Service.queryNFT(nftID)
+      queryCertData(this.$data.contractAddr, nftID)
       .then(response => {
         this.$data.data = response
       })
@@ -86,7 +86,7 @@ export default {
       if (nftID === null) {
         return
       }
-      web3Service.queryNFT(nftID)
+      queryCertData(this.$data.contractAddr, nftID)
       .then(({ CID }) => {
         return getFile(CID)
       })
@@ -105,7 +105,7 @@ export default {
       }
       let promises = []
 
-      let p1 = web3Service.queryNFT(nftID)
+      let p1 = queryCertData(this.$data.contractAddr, nftID)
       .then(({ CID }) => {
         return getFile(CID)
       })
@@ -119,13 +119,13 @@ export default {
       promises.push(p1)
 
       // fake action
-      let p2 = web3Service.approveThroughMetamask(this.$store.state.currentAddr)
+      let p2 = approveIssueFee(this.$store.state.currentAddr, this.$data.contractAddr, 1) //TODO: change this. although its still ok
       promises.push(p2)
-
+      //TODO: need to check "receipt" of tx
       Promise.all(promises)
       .then(arrayData => {
         const encryptedData = arrayData[0]
-        this.$data.data = web3Service.decrypt(encryptedData)
+        this.$data.data = decrypt(encryptedData, AES192KEY)
       })
       .catch(err => {
         console.log(err)
@@ -134,7 +134,10 @@ export default {
     },
 
     queryRevokedCert(nftID) {
-      web3Service.queryRevokedStatus(nftID)
+      if (nftID === null) {
+        return
+      }
+      queryRevokedStatus(this.$data.contractAddr, nftID)
       .then(response => {
         if (response.isRevoked == false) {
           this.$data.data = "HAS_NOT_BEEN_REVOKED"

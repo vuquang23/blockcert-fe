@@ -36,8 +36,8 @@ async function issueCerts(issuer, nftAddress, certFiles) {
   const certsStringContent = await readFile(certFiles).catch(err => errNoti(err, "Readfile failed"))
   let jsonCerts = certsStringContent.map(strContent => JSON.parse(strContent))
   //TODO: query "AES192KEY" from server (server make tx from SP-address
-  jsonCerts = addCertHash(jsonCerts)
   jsonCerts = await pushToIPFS(jsonCerts, AES192KEY) // added CID field
+  jsonCerts = addCertHash(jsonCerts)
   const certsData = filterBlockchainData(jsonCerts)
   console.log(certsData[0])
   const certBatch = await divideToBatch(nftContract, certsData)
@@ -45,193 +45,14 @@ async function issueCerts(issuer, nftAddress, certFiles) {
   return txsHash
 }
 
-// -----------------------
-// export default class Web3Service {
-//   async queryNFT(nftID) {
-//     const arrayData = await getNFTData(this.contract, nftID)
-//     return {
-//       issuer: arrayData[0],
-//       recipient: arrayData[1],
-//       certHash: arrayData[2],
-//       CID: arrayData[3],
-//       issuanceTimestamp: arrayData[4]
-//     }
-//   }
-//
-//   // viewer pay
-//   async approveThroughMetamask(viewer) {
-//     const amount = await getFee(this.contract)
-//     const data = this.feeToken.methods.approve(SPADDR, amount).encodeABI()
-//     const txConfig = {
-//       from: viewer,
-//       to: FEEADDR,
-//       value: 0,
-//       data
-//     }
-//     const gasLimit = await this.web3.eth.estimateGas(txConfig).catch(err => console.log(err))
-//     let nonce = await this.web3.eth.getTransactionCount(viewer).catch(err => console.log(err))
-//     const tx = {
-//       ...txConfig,
-//       nonce: nonce.toString(),
-//       gas: gasLimit.toString()
-//     }
-//     console.log(tx)
-//     const { ethereum } = window
-//     const txHash = await ethereum.request({
-//       method: 'eth_sendTransaction',
-//       params: [tx],
-//     })
-//     return txHash
-//   }
-//
-//   async revokeCertThroughMetamask(issuer, nftID, reason) {
-//     console.log(issuer, nftID, reason)
-//     // console.log(nftID)
-//     // console.log([...nftID])
-//     const data = this.contract.methods.revokeCertificate([nftID], reason).encodeABI()
-//     const txConfig = {
-//       from: issuer,
-//       to: CONTRACTADDR,
-//       value: 0,
-//       data
-//     }
-//     const gasLimit = await this.web3.eth.estimateGas(txConfig).catch(err => console.log(err))
-//     let nonce = await this.web3.eth.getTransactionCount(issuer).catch(err => console.log(err))
-//     const tx = {
-//       ...txConfig,
-//       nonce: nonce.toString(),
-//       gas: gasLimit.toString()
-//     }
-//     console.log(tx)
-//     const { ethereum } = window
-//     const txHash = await ethereum.request({
-//       method: 'eth_sendTransaction',
-//       params: [tx],
-//     })
-//     return txHash
-//   }
-//
-//   decrypt(jsonData) {
-//     return decrypted(jsonData, AES192KEY)
-//   }
-//
-//   async queryRevokedStatus(nftID) {
-//     const status = await queryRevokedStatus(this.contract, nftID)
-//     console.log(status)
-//     return {
-//       isRevoked: status[0],
-//       reason: status[1]
-//     }
-//   }
-// }
-//
-// function sha256Hash(cert) {
-//   const strCert = JSON.stringify(cert)
-//   const hash = createHash('sha256')
-//   const jsonHash = hash.update(strCert).digest('hex')
-//   return '0x' + jsonHash
-// }
-//
-// function extract(fileNames) {
-//   return fileNames.reduce((ret, name) => {
-//     const cert = certData[name]
-//     ret.push({
-//       fileName: name,
-//       issuer: cert["issuer"]["publickey"],
-//       recipient: cert["recipient"]["publickey"],
-//       certHash: sha256Hash(cert),
-//       issuanceTimestamp: Date.now()
-//     })
-//     return ret
-//   }, [])
-// }
-//
-// function merge(currentData, cidData) {
-//   return currentData.reduce((ret, data) => {
-//     for (let i = 0; i < cidData.length; i++) {
-//       if (data.fileName === cidData[i].fileName) {
-//         let merged = {
-//           ...data,
-//           ...cidData[i]
-//         }
-//         delete merged.fileName
-//         ret.push(merged)
-//         break
-//       }
-//     }
-//     return ret
-//   }, [])
-// }
-//
-// function divideBatch(data, batchSize) {
-//   let certBatch = []
-//   data.forEach((cert, index) => {
-//     if (index % batchSize === 0) {
-//       certBatch.push([])
-//     }
-//     const batchID = Math.floor(index / batchSize)
-//     certBatch[batchID].push(cert)
-//   })
-//   return certBatch
-// }
-//
-// async function pushCert(contract, web3, issuer, data) {
-//   const batchSize = await contract.methods.batchSize().call()
-//   const certBatch = divideBatch(data, batchSize)
-//   const { ethereum } = window
-//   let txs = []
-//   let nonce = await web3.eth.getTransactionCount(issuer) - 1
-//   for (const batchID in certBatch) {
-//     console.log(`sign batchID: ${batchID}`)
-//     const data = contract.methods.batchMint(certBatch[batchID]).encodeABI()
-//     const txConfig = {
-//       from: issuer,
-//       to: CONTRACTADDR,
-//       value: 0,
-//       data
-//     }
-//     const gasLimit = await web3.eth.estimateGas(txConfig).catch(err => console.log(err))
-//     nonce++
-//     const tx = {
-//       ...txConfig,
-//       nonce: nonce.toString(),
-//       gas: gasLimit.toString()
-//     }
-//     // console.log(privateKey)
-//     let ok = false
-//     while (ok === false) {
-//       ok = true
-//       const txHash = await ethereum.request({
-//         method: 'eth_sendTransaction',
-//         params: [tx],
-//       })
-//       .catch(err => {
-//         ok = false
-//         console.log(err)
-//       })
-//       if (ok === true) {
-//         txs.push(txHash)
-//       }
-//     }
-//   }
-//   return txs
-//   // return Promise.all(txs)
-// }
-//
+async function revokeCert(issuer, nftAddress, nftIDs, reason) {
+  const { nftContract } = await initContract(nftAddress)
+  const tx = await revoke(nftContract, issuer, nftIDs, reason)
+  return tx
+}
 
-// }
-//
-// function queryRevokedStatus(contract, nftID) {
-//   return contract.methods.revokedStatus(nftID).call()
-// }
-// function filterName(jsonCerts) {
-//   return jsonCerts.reduce((ret, data) => {
-//     const fileName = data.name
-//     ret.push(fileName.split(".")[0])
-//     return ret
-//   }, [])
-// }
 // -----------------------
+
 async function approve(erc20Contract, owner, spender, amount) {
   const data = erc20Contract.methods.approve(spender, amount).encodeABI()
   const rawTx = await initTx(owner, erc20Contract._address, 0, data).catch(err => errNoti(err, "init tx failed"))
@@ -251,6 +72,26 @@ function queryBatchSize(nftContract) {
   return nftContract.methods.batchSize().call()
 }
 
+async function queryCertData(nftAddress, nftID) {
+  const { nftContract } = await initContract(nftAddress)
+  const data = await nftContract.methods.certData(nftID).call()
+  return {
+    issuer: data[0],
+    recipient: data[1],
+    certHash: data[2],
+    CID: data[3],
+    issuanceTimestamp: data[4]
+  }
+}
+
+async function queryRevokedStatus(nftAddress, nftID) {
+  const { nftContract } = await initContract(nftAddress)
+  const data = await nftContract.methods.revokedStatus(nftID).call()
+  return {
+      isRevoked: data[0],
+      reason: data[1]
+    }
+}
 // function queryServiceProvider(nftContract) {
 //   return nftContract.methods.serviceProvider().call()
 // }
@@ -333,6 +174,12 @@ function batchMint(issuer, nftContract, certBatch) {
   return mintBatch(issuer, nftContract, certBatch, 0)
 }
 
+async function revoke(nftContract, issuer, nftIDs, reason) {
+  const data = nftContract.methods.revokeCertificate(nftIDs, reason).encodeABI()
+  const rawTx = await initTx(issuer, nftContract._address, 0, data)
+  return sendTxMetamask(rawTx)
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -344,7 +191,7 @@ async function initTx(from, to, value, data) {
     value,
     data
   }
-  console.log(txConfig)
+  // console.log(txConfig)
   const gasLimit = await WEB3.eth.estimateGas(txConfig).catch(err => errNoti(err, "get gasLimit failed"))
   let nonce = await WEB3.eth.getTransactionCount(from).catch(err => errNoti(err, "get nonce failed"))
   return {
@@ -364,5 +211,8 @@ function sendTxMetamask(rawTx) {
 
 export {
   approveIssueFee,
-  issueCerts
+  issueCerts,
+  queryCertData,
+  revokeCert,
+  queryRevokedStatus
 }

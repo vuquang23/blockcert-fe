@@ -20,7 +20,7 @@
         </h6>
 
         <div>
-          <button class="btn btn-primary" type="button" @click="revoke(issuerAddr, nftID, reason)">Revoke</button>
+          <button class="btn btn-primary" type="button" @click="revoke()">Revoke</button>
         </div>
 
         <h6 class="fw-bold" style="margin-top: 0.5em">{{txStatus}}</h6>
@@ -35,7 +35,7 @@
 
 <script>
 import {CONTRACTADDR, ISSUERADDR} from "../env";
-import {web3Service} from "../blockchain/web3";
+import {revokeCert} from "../blockchain/web3";
 
 export default {
   name: "RevokePage",
@@ -55,12 +55,12 @@ export default {
     }
   },
   methods: {
-    revoke(issuerAddr, nftID, reason) {
-      if (nftID === null) {
+    revoke() {
+      if (this.$data.nftID === null || this.currentAddr !== this.currentAddr) {
         return
       }
 
-      web3Service.revokeCertThroughMetamask(issuerAddr, nftID, reason)
+      revokeCert(this.currentAddr, this.$data.contractAddr, [this.$data.nftID], this.$data.reason)
       .then(txs => {
         console.log(txs)
         this.$data.txStatus = "revoke OK!"

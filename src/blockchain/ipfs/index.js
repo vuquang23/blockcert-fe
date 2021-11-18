@@ -1,29 +1,26 @@
 import { create } from 'ipfs-http-client'
 import CryptoJS from 'crypto-js'
 // import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
-// import toBuffer from 'it-to-buffer'
+import toBuffer from 'it-to-buffer'
 
 const ENCRYPTEDFIELDS = ['achievement']
 
+function decrypt(jsonData, key) {
+    ENCRYPTEDFIELDS.forEach(fieldE => {
+        const ciphertext = jsonData[fieldE]
+        const bytes = CryptoJS.AES.decrypt(ciphertext, key)
+        const originalText = bytes.toString(CryptoJS.enc.Utf8)
+        jsonData[fieldE] = JSON.parse(originalText)
+    })
+    return jsonData
+}
 
-// function decrypted(jsonData, key) {
-//     const ciphertext = jsonData.achievement
-//     let bytes = CryptoJS.AES.decrypt(ciphertext, key)
-//     var originalText = bytes.toString(CryptoJS.enc.Utf8)
-//     const ret = {
-//         ...jsonData,
-//         achievement: JSON.parse(originalText)
-//     }
-//     console.log(ret)
-//     return ret
-// }
-
-// async function getFile(CID) {
-//     const ipfsClient = create('http://localhost:5001')
-//     const decoder = new TextDecoder()
-//     const data = await toBuffer(ipfsClient.cat(CID))
-//     return decoder.decode(data)
-// }
+async function getFile(CID) {
+    const ipfsClient = create('http://localhost:5001')
+    const decoder = new TextDecoder()
+    const data = await toBuffer(ipfsClient.cat(CID))
+    return decoder.decode(data)
+}
 
 function encryptString(data, key) {
     if (typeof data !== 'string') {
@@ -63,5 +60,7 @@ async function pushToIPFS(jsonCerts, key) {
 }
 
 export {
-    pushToIPFS
+    pushToIPFS,
+    getFile,
+    decrypt
 }
