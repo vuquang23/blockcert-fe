@@ -3,6 +3,7 @@ import HomePage from "../views/HomePage"
 import IssuePage from "../views/IssuePage"
 import ViewPage from "../views/ViewPage"
 import RevokePage from "../views/RevokePage";
+import VerifyPage from "../views/VerifyPage";
 
 const routes = [{
   path: '/',
@@ -19,6 +20,10 @@ const routes = [{
     {
       path: 'revoke',
       component: RevokePage
+    },
+    {
+      path: 'verify',
+      component: VerifyPage
     }
   ]
 }]

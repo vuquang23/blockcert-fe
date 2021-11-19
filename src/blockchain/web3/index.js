@@ -27,13 +27,26 @@ async function approveIssueFee(issuer, nftAddress, certLen) {
     throw new Error("Batchsize not greater than 0")
   }
   const totalFee = (Math.floor((certLen - 1)/batchSize) + 1) * batchMintFee
-  await approve(feeContract, issuer, nftContract._address, new BN(totalFee)).catch(err => errNoti(err, "approve to sp failed"))
+  const txHash = await approve(feeContract, issuer, nftContract._address, new BN(totalFee)).catch(err => errNoti(err, "approve to sp failed"))
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const receipt = await WEB3.eth.getTransactionReceipt(txHash)
+    if (receipt === null) {
+      await sleep(3000)
+    } else {
+      if (receipt.status === false) {
+        errNoti(null, "approve-tx reverted")
+      }
+      break
+    }
+  }
+
   return true
 }
 
 async function issueCerts(issuer, nftAddress, certFiles) {
   const { nftContract } = await initContract(nftAddress)
-  const certsStringContent = await readFile(certFiles).catch(err => errNoti(err, "Readfile failed"))
+  const certsStringContent = await readFile(certFiles).catch(err => errNoti(err, "Read file failed"))
   let jsonCerts = certsStringContent.map(strContent => JSON.parse(strContent))
   //TODO: query "AES192KEY" from server (server make tx from SP-address
   jsonCerts = await pushToIPFS(jsonCerts, AES192KEY) // added CID field
@@ -49,6 +62,22 @@ async function revokeCert(issuer, nftAddress, nftIDs, reason) {
   const { nftContract } = await initContract(nftAddress)
   const tx = await revoke(nftContract, issuer, nftIDs, reason)
   return tx
+}
+
+async function verifyCert(nftAddress, certFile) {
+  const { nftContract } = await initContract(nftAddress)
+  const certStringContent = await readFile(certFile).catch(err => errNoti(err, "Read file failed"))
+  let jsonCerts = JSON.parse(certStringContent[0])
+  const certHash = sha256Hash(JSON.stringify(jsonCerts))
+  console.log(certHash)
+  const nftID = JSON.parse(await queryHashToID(nftContract, certHash))
+  console.log(nftID)
+  if (nftID === 0) {
+    return false
+  }
+  const status = await queryRevokedStatus(nftAddress, nftID)
+  console.log(status)
+  return !status.isRevoked
 }
 
 // -----------------------
@@ -70,6 +99,10 @@ function queryPlatformFee(nftContract) {
 
 function queryBatchSize(nftContract) {
   return nftContract.methods.batchSize().call()
+}
+
+function queryHashToID(nftContract, certHash) {
+  return nftContract.methods.hashToID(certHash).call()
 }
 
 async function queryCertData(nftAddress, nftID) {
@@ -214,5 +247,6 @@ export {
   issueCerts,
   queryCertData,
   revokeCert,
-  queryRevokedStatus
+  queryRevokedStatus,
+  verifyCert
 }

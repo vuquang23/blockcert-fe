@@ -2,7 +2,7 @@
   <div class="container vh-100">
     <div class="row justify-content-center vh-100">
       <div class="col-6">
-        <h6>View certificates for Organization:<br>
+        <h6>View certificates of Organization:<br>
           <a :href="`https://testnet.bscscan.com/address/${contractAddr}`" target="_blank">{{contractAddr}}</a>
         </h6>
 

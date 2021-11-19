@@ -13,6 +13,9 @@
           <li class="nav-item">
             <a class="nav-link" :href="`/revoke`">Revoke</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" :href="`/verify`">Verify</a>
+          </li>
         </ul>
       </div>
       <div class="d-flex">
