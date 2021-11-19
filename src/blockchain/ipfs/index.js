@@ -2,6 +2,7 @@ import { create } from 'ipfs-http-client'
 import CryptoJS from 'crypto-js'
 // import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import toBuffer from 'it-to-buffer'
+import {IPFSAPI} from "../../env";
 
 const ENCRYPTEDFIELDS = ['achievement']
 
@@ -16,7 +17,7 @@ function decrypt(jsonData, key) {
 }
 
 async function getFile(CID) {
-    const ipfsClient = create('http://localhost:5001')
+    const ipfsClient = create(IPFSAPI)
     const decoder = new TextDecoder()
     const data = await toBuffer(ipfsClient.cat(CID))
     return decoder.decode(data)
@@ -41,7 +42,7 @@ function encrypt(jsonCerts, key) {
 
 async function pushToIPFS(jsonCerts, key) {
     jsonCerts = encrypt(jsonCerts, key)
-    const ipfsClient = create('http://localhost:5001') //TODO: need to specify in env to deploy to cloud
+    const ipfsClient = create(IPFSAPI) //TODO: need to specify in env to deploy to cloud
     let promises = []
     jsonCerts.forEach(jsonE => {
         promises.push(

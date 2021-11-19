@@ -9,9 +9,6 @@
       <h6>Your organization address:<br>
         <a :href="`https://testnet.bscscan.com/address/${contractAddr}`" target="_blank">{{contractAddr}}</a>
       </h6>
-      <h6>Service Provider address:<br>
-        <a :href="`https://testnet.bscscan.com/address/${spAddr}`" target="_blank">{{spAddr}}</a>
-      </h6>
 
       <div>
         <div class="mb-3" style="margin-top: 3em">
@@ -24,8 +21,8 @@
         <h6 class="fw-bold" style="margin-top: 0.5em">{{approveStatus}}</h6>
 
         <h6 class="fw-bold" style="margin-top: 3em">Sign certs</h6>
-        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" >Sign</button>
-<!--        :disabled="!isApproved"-->
+        <button type="submit" class="btn btn-sm btn-primary" @click="signCerts()" :disabled="!isApproved">Sign</button>
+
         <h6 class="fw-bold" style="margin-top: 0.5em">{{signStatus}}</h6>
 
         <h6 v-show="typeof txsHash === 'object' ? (txsHash.length > 0) : false">Tx Hash:</h6>
@@ -41,7 +38,7 @@
 </template>
 
 <script>
-import {CONTRACTADDR, ISSUERADDR, SPADDR} from "@/env";
+import {CONTRACTADDR, ISSUERADDR} from "@/env";
 import { approveIssueFee, issueCerts } from "../blockchain/web3";
 
 export default {
@@ -50,7 +47,6 @@ export default {
     return {
       issuerAddr: ISSUERADDR,
       contractAddr: CONTRACTADDR,
-      spAddr: SPADDR,
       certFiles: [],
       isApproved: false,
       privateKey: null,
